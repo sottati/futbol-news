@@ -16,7 +16,7 @@ async function jornadaFutbol(data: string) {
   const { text } = await generateText({
     model: google("gemini-2.5-flash-preview-05-20"),
     system:
-      "Tu rol es el de resumir de forma concisa  las noticias que se te pasan que van a ser siempre del dia de la fecha",
+      "Resume de forma concisa cada noticia del día. Para cada noticia, el título debe ser un hipervínculo al link original de la noticia, seguido de un breve resumen. El resto del texto debe ser plano, sin formato markdown ni símbolos especiales, excepto el hipervínculo en el título.",
     prompt: data,
   });
   return text;
@@ -30,7 +30,7 @@ async function sendTelegramMessage(message: string) {
     body: JSON.stringify({
       chat_id: TELEGRAM_CHAT_ID,
       text: message,
-      //   parse_mode: "MarkdownV2",
+      parse_mode: "HTML",
     }),
   });
   if (!response.ok) {
@@ -43,7 +43,7 @@ async function readRssFeed() {
   const feed = await parser.parseURL(
     "http://www.ole.com.ar/rss/futbol-primera/"
   );
-  //   console.log(feed);
+  console.log(feed);
   return feed.items.map((item) => ({
     title: item.title,
     content: item.content || item.contentSnippet || item.summary || "",
@@ -51,13 +51,9 @@ async function readRssFeed() {
   }));
 }
 
-function escapeMarkdownV2(text: string) {
-  return text.replace(/([_*[\]()~`>#+=|{}.!-])/g, "\\$1");
-}
-
 async function main() {
   const texto = await readRssFeed();
-  const parse = escapeMarkdownV2(JSON.stringify(texto));
+  const parse = JSON.stringify(texto); // No escapamos markdown
   const jornada = await jornadaFutbol(parse);
   await sendTelegramMessage(jornada);
 

@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: "15 14 * * *" # Ejecuta el flujo de trabajo diariamente a las 19:00
+    - cron: "33 14 * * *" # Ejecuta el flujo de trabajo diariamente a las 19:00
   workflow_dispatch:
 
 jobs:
