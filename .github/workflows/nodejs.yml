@@ -6,7 +6,8 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: "0 19 * * *" # Ejecuta el flujo de trabajo diariamente a las 19:00
+    - cron: "15 14 * * *" # Ejecuta el flujo de trabajo diariamente a las 19:00
+  workflow_dispatch:
 
 jobs:
   build:
@@ -23,4 +24,9 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm install
-      - run: npm test
+      - name: Run Futbol News Bot
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.GOOGLE_GENERATIVE_AI_API_KEY }}
+        run: npx ts-node src/index.ts

@@ -1,0 +1,181 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 19
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4dda7595-7ba2-424e-b435-e484a967d6c9",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "http://www.ole.com.ar/rss/futbol-primera/",
+        "options": {
+          "ignoreSSL": false
+        }
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        0
+      ],
+      "id": "40bcd6ac-0d55-4ffd-b638-95285f7e9778",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Datos y noticias:\n{{ $json.content }}",
+        "options": {
+          "systemMessage": "Tu rol es el de resumir de forma concisa  las noticias que se te pasan que van a ser siempre del dia de la fecha\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        720,
+        0
+      ],
+      "id": "d277fc50-7c79-45cb-96ea-76c3449f7619",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "function escapeMarkdownV2(text) {\n  return text.replace(/([_*\\[\\]()~>#\\+\\-=|{}.!])/g, '\\\\$1');\n}\n\nconst noticias = items.map(item => {\n  const titulo = item.json.title || '';\n  const descripcion = item.json.content || item.json.description || '';\n  return `- ${titulo.trim()}: ${descripcion.trim()}`;\n}).join('\\n');\n\n// Aplicamos el escape al string completo\nconst noticiasEscapadas = escapeMarkdownV2(noticias);\n\nreturn [\n  {\n    json: {\n      content: noticiasEscapadas\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ],
+      "id": "63702972-ad83-4a23-859b-99a9429125e3",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-preview-05-20",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        920,
+        240
+      ],
+      "id": "f1975291-3aac-46bd-b860-66602f1ea5b0",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MAuTac26mU9iPLhr",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "1410899087",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1100,
+        0
+      ],
+      "id": "d560adc2-0114-4d5e-835e-75320603513c",
+      "name": "Telegram",
+      "webhookId": "10a0b2f3-739f-4555-a97d-34c1a299f29d",
+      "credentials": {
+        "telegramApi": {
+          "id": "CK0Xz6HCYZipW7Ij",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ad4f5abc-2a67-4ec3-972c-1b4e8f483e50",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e8cf2fa41b377268298e4a0e16496eb7e903ee3571203bd452725bc815746c9f"
+  },
+  "id": "DkMLOUHUrtv6bJUM",
+  "tags": []
+}
