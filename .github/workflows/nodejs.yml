@@ -7,7 +7,7 @@ on:
     branches: [main]
   workflow_dispatch:
   schedule:
-    - cron: "10 10 * * *" # Ejecuta el flujo de trabajo diariamente a las 3:10PM UTC-3 (10:10 AM GMT-5)
+    - cron: "15 18 * * *" # Ejecuta el flujo de trabajo diariamente a las 3:10PM UTC-3
 
 jobs:
   build:
