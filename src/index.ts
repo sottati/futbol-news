@@ -43,7 +43,6 @@ async function readRssFeed() {
   const feed = await parser.parseURL(
     "http://www.ole.com.ar/rss/futbol-primera/"
   );
-  console.log(feed);
   return feed.items.map((item) => ({
     title: item.title,
     content: item.content || item.contentSnippet || item.summary || "",
@@ -52,12 +51,11 @@ async function readRssFeed() {
 }
 
 async function main() {
-  const texto = await readRssFeed();
+  const texto = await readRssFeed(); // chupamos las noticias
   const parse = JSON.stringify(texto); // No escapamos markdown
-  const jornada = await jornadaFutbol(parse);
-  await sendTelegramMessage(jornada);
+  const jornada = await jornadaFutbol(parse); // generamos el resumen
+  await sendTelegramMessage(jornada); // enviamos el resumen a telegram
 
-  console.log(jornada);
   process.exit(0); // Fuerza la salida exitosa
 }
 
